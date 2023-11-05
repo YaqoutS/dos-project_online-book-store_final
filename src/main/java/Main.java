@@ -23,5 +23,13 @@ public class Main {
 			}
 			return gson.toJson(books);
 		});
+		
+		get("/info/:bookID", (req, res) -> {
+				int id = Integer.parseInt(req.params(":bookID"));
+				for(Book book: catalog) {
+					if(book.getId() == id) return gson.toJson(book);
+				}
+				return "There is no book with id = " + id;
+		});
 	}
 }
