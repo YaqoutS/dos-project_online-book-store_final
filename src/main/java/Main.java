@@ -15,7 +15,7 @@ public class Main {
 
 	private static Gson gson = new Gson();
 
-	private static ArrayList<Book> catalog = new ArrayList<Book>();
+	// private static ArrayList<Book> catalog = new ArrayList<Book>();
 
 	public static void connect() {
 		Connection conn = null;
