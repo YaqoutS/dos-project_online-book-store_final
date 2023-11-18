@@ -87,8 +87,9 @@ public class Main {
 				while (result.next()) {
 					String bookID = result.getString("bookID");
 					String topic = result.getString("topic");
+					String title = result.getString("title");
 					if (topic.equals(decodedTopic)) {
-						books.add(new BookDTO(Integer.parseInt(bookID), topic));
+						books.add(new BookDTO(Integer.parseInt(bookID), title));
 					}
 				}
 				conn.close();
@@ -99,7 +100,6 @@ public class Main {
 			// if there is no book with the requested topic
 			if(books.isEmpty()) {
 				res.status(404);
-				System.out.print("There is no book with the topic: " + decodedTopic);
 				return "There is no book with the topic: " + decodedTopic;
 			}
 			return gson.toJson(books);
@@ -158,10 +158,9 @@ public class Main {
 				PreparedStatement pstmt = conn.prepareStatement(updateStatement);
 				pstmt.setInt(1, Integer.parseInt(requestedID));
 				pstmt.executeUpdate();
-				conn.commit();
 				conn.close();
 			} catch (SQLException e) {
-				System.out.println("Error from dec API" + e.getMessage());
+				System.out.println("Error from dec API " + e.getMessage());
 			}
 			
 			return "Book's quantity updated successfully";
