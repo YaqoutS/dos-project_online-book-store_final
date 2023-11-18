@@ -65,7 +65,6 @@ public class Main {
 			
 			// create a connection to the database
 			conn = DriverManager.getConnection(url);
-			System.out.println("Connection to SQLite has been established from add fun.");
 
 			Statement stmt = conn.createStatement();
 			
@@ -141,7 +140,7 @@ public class Main {
 	            	return "The item is out of stock";
 	            }
 	            
-	            // // URL of the dec API that will be called to decrement the quantity
+	            // URL of the dec API that will be called to decrement the quantity
 	            apiUrl = "http://localhost:4568/dec/" + book.getId();
 	            url = new URL(apiUrl);
 	            connection = (HttpURLConnection) url.openConnection();
@@ -149,7 +148,6 @@ public class Main {
 
 	            // extract the response code
 	            int responseCode2 = connection.getResponseCode();
-	            System.out.println("PUT response Code: " + responseCode2);
 
 	            // Read the response content
 	            BufferedReader reader2 = new BufferedReader(new InputStreamReader(connection.getInputStream())); 
@@ -158,7 +156,7 @@ public class Main {
 	            while ((line2 = reader2.readLine()) != null) {
 	                response.append(line2);
 	            }
-	            reader.close();	            
+	            reader2.close();	            
 	            
 	            // add the order to the DB
 	            int orderID = addNewOrder(book.getId());
@@ -169,7 +167,7 @@ public class Main {
 	            }
 	            
 	            // return the id of the created order
-	            return "The order id = " + orderID;
+	            return "Purchase done successfully! \nThe order id = " + orderID;
 	            
 	        } catch (IOException e) {
 	            e.printStackTrace();
