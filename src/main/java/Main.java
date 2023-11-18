@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import com.google.gson.Gson;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -68,7 +70,8 @@ public class Main {
 		get("/search/:topic", (req, res) -> {
 			
 			// extract the 'topic' value from the URL
-			String requestTopic = req.params(":topic");
+			String encodedTopic = req.params(":topic");
+		    String decodedTopic = URLDecoder.decode(encodedTopic, StandardCharsets.UTF_8.toString());
 			
 			ArrayList<BookDTO> books = new ArrayList<BookDTO>();
 			
@@ -84,7 +87,7 @@ public class Main {
 				while (result.next()) {
 					String bookID = result.getString("bookID");
 					String topic = result.getString("topic");
-					if (topic.equals(requestTopic)) {
+					if (topic.equals(decodedTopic)) {
 						books.add(new BookDTO(Integer.parseInt(bookID), topic));
 					}
 				}
@@ -96,7 +99,8 @@ public class Main {
 			// if there is no book with the requested topic
 			if(books.isEmpty()) {
 				res.status(404);
-				return "There is no book with the topic: " + requestTopic;
+				System.out.print("There is no book with the topic: " + decodedTopic);
+				return "There is no book with the topic: " + decodedTopic;
 			}
 			return gson.toJson(books);
 		});
