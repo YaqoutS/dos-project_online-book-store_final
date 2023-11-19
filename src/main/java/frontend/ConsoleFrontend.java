@@ -166,7 +166,37 @@ public class ConsoleFrontend {
         }
     	return 200;
     }
-    	            
+    
+    private static String purchaseAPICall(int bookID) {
+    	//int orderID = -1;
+    	
+    	StringBuilder response = new StringBuilder();
+    	try {
+    		String apiUrl = "http://localhost:4567/purchase/" + bookID;
+
+            // open a connection to the info API
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            
+            connection.setRequestMethod("POST");
+            
+            // read the response content
+            BufferedReader reader2 = new BufferedReader(new InputStreamReader(connection.getInputStream())); 
+            response = new StringBuilder();
+            String line2;
+            while ((line2 = reader2.readLine()) != null) {
+                response.append(line2);
+            }
+            reader2.close();
+    		
+    	} catch(IOException e) {
+            e.printStackTrace();
+            return response.toString();
+    	}
+    	
+    	return response.toString();
+    }
+    
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -222,8 +252,9 @@ public class ConsoleFrontend {
                     System.out.println("Processing purchase for book with id: " + bookIdPurchase);
                     
                     // calling the purchase API
-
-
+                    String resutl = purchaseAPICall(bookIdPurchase);
+                    System.out.println(resutl);
+                    
                     break;
                 case 4:
                 	exit = true;
