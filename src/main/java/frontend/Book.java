@@ -49,4 +49,15 @@ public class Book {
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
+	
+	@Override
+	public String toString() {
+	    return "[" +
+	            "id=" + id +
+	            ", topic='" + topic + '\'' +
+	            ", title='" + title + '\'' +
+	            ", price=" + price +
+	            ", quantity=" + quantity +
+	            ']';
+	}
 }
