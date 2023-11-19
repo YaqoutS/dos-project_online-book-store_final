@@ -121,7 +121,52 @@ public class ConsoleFrontend {
         }	
     }
     
-	            
+    private static int infoAPICall(int bookID, Book book) {
+    	
+    	try {
+            // URL of the info API we want to call
+            String apiUrl = "http://localhost:4568/info/" + bookID;
+
+            // open a connection to the info API
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // extract the response code
+            int responseCode = connection.getResponseCode();
+
+            // check if the response code indicates not found (HTTP 404 OK)
+            if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+            	return 404;
+            }
+            
+            // read the info API response
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder responseStringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                responseStringBuilder.append(line);
+            }
+            reader.close();
+
+            // get the response as a string
+            String apiResponse = responseStringBuilder.toString();
+
+            // convert the response to a book object and updating the original book object
+            Book returnedBook = gson.fromJson(apiResponse, Book.class);            
+            book.setId(returnedBook.getId());
+            book.setPrice(returnedBook.getPrice());
+            book.setQuantity(returnedBook.getQuantity());
+            book.setTitle(returnedBook.getTitle());
+            book.setTopic(returnedBook.getTopic());
+            
+    	} catch (IOException e) {
+            e.printStackTrace();
+            return 500;
+        }
+    	return 200;
+    }
+    	            
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -160,7 +205,15 @@ public class ConsoleFrontend {
                     System.out.println("Displaying info for book with id: " + bookID);
                     
                     // calling the info API
+                    int infoStatusCode = infoAPICall(bookID, book);
                     
+                    if(infoStatusCode == 404) {
+                    	System.out.println("There is no book with ID = " + bookID);
+                    } else if(infoStatusCode == 500) {
+                    	System.out.println("Request Faild.");
+                    } else {
+                    	System.out.println(book);
+                    }
                     
                     break;
                 case 3:
