@@ -27,6 +27,7 @@
   </dependencies>
 
   <build>
+  <finalName>frontend</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -37,7 +38,22 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      
+      <!-- Add the maven-jar-plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <!-- Specify the main class if needed -->
+                 <archive>
+                    <manifest>
+                        <addClasspath>true</addClasspath>
+                        <mainClass>ConsoleFrontend</mainClass>
+                    </manifest>
+                </archive> 
+            </configuration>
+        </plugin>
     </plugins>
   </build>
-  
 </project>
