@@ -1,14 +1,21 @@
 package frontend;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import spark.Request;
-import spark.Response;
-import spark.Route;
 
 public class ConsoleFrontend {
 	
@@ -59,6 +66,61 @@ public class ConsoleFrontend {
 
         return id;
     }
+    
+    private static List<BookDTO> searchAPICall(String topic) {
+    	
+    	try {
+    		String encodedTopic = URLEncoder.encode(topic, StandardCharsets.UTF_8.toString());
+            String apiUrl = "http://localhost:4568/search/" + encodedTopic;
+        	
+        	List <BookDTO> books = new ArrayList<>();
+        	
+        	String apiResponse = "";
+        	
+        	// try to open a connection to the info API
+        	try {
+        		URL url = new URL(apiUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+
+                // extract the response code
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                	// read the info API response
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder responseStringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        responseStringBuilder.append(line);
+                    }
+                    reader.close();
+
+                    // get the response as a string
+                    apiResponse = responseStringBuilder.toString();
+
+                    // converting the response to a book object
+                    TypeToken<List<BookDTO>> typeToken = new TypeToken<List<BookDTO>>() {};
+                    books = gson.fromJson(apiResponse, typeToken.getType());
+                } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                    System.out.println("No results found for the search topic: " + topic);
+                } else {
+                    System.out.println("Unexpected response code: " + responseCode);
+                }
+                
+        	} catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Error calling the API");
+            }
+        	
+        	return books;
+        	
+    	} catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            System.out.println("Error encoding the search topic");
+            return Collections.emptyList(); // Return an empty list on error
+        }	
+    }
+    
 	            
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -79,7 +141,15 @@ public class ConsoleFrontend {
                     System.out.println("Performing search for topic: " + searchTopic);
                     
                     // calling the search API
-                    
+                    List<BookDTO> searchResults = searchAPICall(searchTopic);
+
+                    // process the search results
+                    if (searchResults != null && !searchResults.isEmpty()) {
+                        System.out.println("Search results:");
+                        for (BookDTO book : searchResults) {
+                            System.out.println(book); // Assuming BookDTO has a meaningful toString() method
+                        }
+                    }
                     
                     break;
                 case 2:
