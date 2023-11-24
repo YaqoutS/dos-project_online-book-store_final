@@ -71,7 +71,7 @@ public class ConsoleFrontend {
     	
     	try {
     		String encodedTopic = URLEncoder.encode(topic, StandardCharsets.UTF_8.toString());
-            String apiUrl = "http://localhost:4568/search/" + encodedTopic;
+            String apiUrl = "http://catalog-server:4568/search/" + encodedTopic;
         	
         	List <BookDTO> books = new ArrayList<>();
         	
@@ -125,7 +125,7 @@ public class ConsoleFrontend {
     	
     	try {
             // URL of the info API we want to call
-            String apiUrl = "http://localhost:4568/info/" + bookID;
+            String apiUrl = "http://catalog-server:4568/info/" + bookID;
 
             // open a connection to the info API
             URL url = new URL(apiUrl);
@@ -172,7 +172,7 @@ public class ConsoleFrontend {
     	
     	StringBuilder response = new StringBuilder();
     	try {
-    		String apiUrl = "http://localhost:4567/purchase/" + bookID;
+    		String apiUrl = "http://order-server:4567/purchase/" + bookID;
 
             // open a connection to the info API
             URL url = new URL(apiUrl);
