@@ -4,6 +4,11 @@ import java.util.ArrayList;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -63,6 +68,35 @@ public class Main {
 		} catch (SQLException e) {
 			System.out.println("Error from catalog server: " + e.getMessage());
 		}
+	}
+	
+	private static boolean invaldateAPICall(String bookID) {
+
+		StringBuilder response = new StringBuilder();
+		try {
+			String apiUrl = "http://localhost:4570/invalidate/" + bookID;
+
+			// open a connection to the info API
+			URL url = new URL(apiUrl);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+			connection.setRequestMethod("DELETE");
+
+			// read the response content
+			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			response = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				response.append(line);
+			}
+			reader.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
 	}
 	
 	public static void main(String[] args) {
@@ -158,6 +192,11 @@ public class Main {
 			// extract the 'bookID' value from the URL
 			String requestedID = req.params(":bookID");
 			
+			// invalidate the book in the front-end cache
+			if (!invaldateAPICall(requestedID)) {
+				return "Failed to dec book quantity";
+			}
+						
 			// the update query to decrement the quantity
 			String updateStatement = "UPDATE book SET quantity = quantity - 1 WHERE bookID = ?;";
 			
