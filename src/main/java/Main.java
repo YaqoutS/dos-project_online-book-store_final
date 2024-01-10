@@ -4,6 +4,11 @@ import java.util.ArrayList;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -49,8 +54,7 @@ public class Main {
 //			stmt.executeUpdate(SQLquery);
 //			SQLquery = "insert into book values('4', 'undergraduate school', 'Cooking for the Impatient Undergrad', '30', '10');";
 //			stmt.executeUpdate(SQLquery);
-
-//			String SQLquery = "insert into book values('5', 'new topic', 'How to finish Project 3 on time', '30', '10');";
+//			SQLquery = "insert into book values('5', 'new topic', 'How to finish Project 3 on time', '30', '10');";
 //			stmt.executeUpdate(SQLquery);
 //			SQLquery = "insert into book values ('6', 'new topic', 'Why theory classes are so hard', '30', '10');";
 //			stmt.executeUpdate(SQLquery);
@@ -65,6 +69,35 @@ public class Main {
 		}
 	}
 	
+	private static boolean invaldateAPICall(String bookID) {
+
+		StringBuilder response = new StringBuilder();
+		try {
+			String apiUrl = "http://localhost:4570/invalidate/" + bookID;
+
+			// open a connection to the info API
+			URL url = new URL(apiUrl);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+			connection.setRequestMethod("DELETE");
+
+			// read the response content
+			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			response = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				response.append(line);
+			}
+			reader.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+	
 	public static void main(String[] args) {
 
 		// change the port of the catalog server to prevent conflict with the order server
@@ -75,6 +108,7 @@ public class Main {
 
 		// search API
 		get("/search/:topic", (req, res) -> {
+			System.out.println("Inside primary catalog server / search API");
 			
 			// extract the 'topic' value from the URL
 			String encodedTopic = req.params(":topic");
@@ -114,6 +148,7 @@ public class Main {
 
 		// info API
 		get("/info/:bookID", (req, res) -> {
+			System.out.println("Inside primary catalog server / info API");
 
 			// extract the 'bookID' value from the URL
 			int requestId = Integer.parseInt(req.params(":bookID"));
@@ -151,9 +186,15 @@ public class Main {
 		
 		// the decrement API (to decrement the quantity of a specific book)
 		put("/dec/:bookID", (req, res) -> {
+			System.out.println("Inside primary catalog server / dec API");
 			
 			// extract the 'bookID' value from the URL
 			String requestedID = req.params(":bookID");
+			
+			// invalidate the book in the front-end cache
+			if (!invaldateAPICall(requestedID)) {
+				return "Failed to dec book quantity";
+			}
 			
 			// the update query to decrement the quantity
 			String updateStatement = "UPDATE book SET quantity = quantity - 1 WHERE bookID = ?;";
