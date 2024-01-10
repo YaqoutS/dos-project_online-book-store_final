@@ -8,6 +8,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.InputMismatchException;
@@ -19,6 +24,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
+import static spark.Spark.*;
 
 public class ConsoleFrontend {
 
@@ -86,7 +93,7 @@ public class ConsoleFrontend {
 		return cache.getIfPresent(key);
 	}
 
-	public static void cacheEvict(String key) {
+	public static void cacheInvalidate(String key) {
 		cache.invalidate(key);
 	}
 
@@ -257,8 +264,22 @@ public class ConsoleFrontend {
 	}
 
 	public static void main(String[] args) {
-		Scanner scanner = new Scanner(System.in);
+		port(4570);
 
+		// book invalidate API
+		delete("/invalidate/:bookID", (req, res) -> {
+
+			// extract the 'bookID' value from the URL
+			int bookId = Integer.parseInt(req.params(":bookID"));
+			
+			// delete the book from the cache
+			cacheInvalidate(String.valueOf(bookId));
+
+			return "Book invalidated / id = " + bookId;
+		});
+		
+		Scanner scanner = new Scanner(System.in);
+		
 		// Ask the user for the service choice
 		int serviceChoice;
 		boolean exit = false;
