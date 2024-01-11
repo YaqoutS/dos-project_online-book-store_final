@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  catalog-server:
+    image: catalog-server
+    ports:
+      - "4568:4568"
+    networks:
+      - online-book-store
+    volumes:
+      - ./catalog-server/catalog.db:/app/catalog.db
+
+  order-server:
+    image: order-server
+    ports:
+      - "4567:4567"
+    networks:
+      - online-book-store
+    depends_on:
+      - catalog-server
+    volumes:
+      - ./order-server/orderserver.db:/app/orderserver.db
+
+  catalog-server-replica:
+    image: catalog-server-replica
+    ports:
+      - "4569:4569"
+    networks:
+      - online-book-store
+    volumes:
+      - ./catalog-server-replica/catalog.db:/app/catalog.db
+
+  order-server-replica:
+    image: order-server-replica
+    ports:
+      - "4566:4566"
+    networks:
+      - online-book-store
+    depends_on:
+      - catalog-server-replica
+    volumes:
+      - ./order-server-replica/orderserver.db:/app/orderserver.db
+
+  frontend:
+    image: frontend
+    ports:
+      - "4570:4570"
+    networks:
+      - online-book-store
+    stdin_open: true # Keeps the STDIN open to allow interaction with the console
+    tty: true # Allocates a pseudo-TTY to keep the container running
+    depends_on:
+      - catalog-server
+      - order-server
+      - catalog-server-replica
+      - order-server-replica
+
+networks:
+  online-book-store:
+    driver: bridge
